@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            color: #333;
+            font-family: 'Georgia', serif;
+            padding: 0 10%;
+        }
+        h1 {
+            color: #6a5acd;
+            text-align: center;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+        .delete-btn {
+            cursor: pointer;
+            color: pink;
+            border: 2px solid pink;
+            background-color: transparent;
+            padding: 5px 10px;
+            margin-right: 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        .delete-btn:hover {
+            background-color: rgba(255, 192, 203, 0.3);
+        }
+        input[type="text"] {
+            width: calc(100% - 50px);
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px solid #6a5acd;
+            margin-right: 10px;
+        }
+        button {
+            background-color: #6a5acd;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(106, 90, 205, 0.5);
+        }
+    </style>
+</head>
+<body>
+<h1>To-Do List</h1>
+<div style="display:flex; align-items:center;">
+    <input type="text" id="todo-input" placeholder="Введите дело...">
+    <button onclick="addTodo()">+</button>
+</div>
+<ul id="todo-list"></ul>
+
+<script>
+    async function fetchTodos() {
+        const response = await fetch('/todos');
+        const todos = await response.json();
+        const todoList = document.getElementById('todo-list');
+        todoList.innerHTML = '';
+        todos.forEach(todo => {
+            const li = document.createElement('li');
+
+            // Создаем кнопку удаления
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '-';
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.onclick = () => deleteTodo(todo.id);
+
+            // Добавляем текст задачи
+            const taskText = document.createElement('span');
+            taskText.textContent = todo.task;
+
+            // Добавляем элементы в список
+            li.appendChild(deleteBtn);
+            li.appendChild(taskText);
+
+            todoList.appendChild(li);
+        });
+    }
+
+    async function addTodo() {
+        const input = document.getElementById('todo-input');
+        const task = input.value;
+        if (task) {
+            await fetch('/todos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task })
+            });
+            input.value = '';
+            fetchTodos();
+        }
+    }
+
+    async function deleteTodo(id) {
+        await fetch(`/todos/${id}`, { method: 'DELETE' });
+        fetchTodos();
+    }
+
+    fetchTodos();
+</script>
+</body>
+</html>
