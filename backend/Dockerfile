@@ -1,4 +1,4 @@
-FROM node:18-alpine AS build
+FROM node:18-alpine3.21 AS build
 
 WORKDIR /app/backend
 
@@ -8,7 +8,7 @@ RUN npm install && npm cache clean --force
 
 COPY . .
 
-FROM node:18-alpine
+FROM node:18-alpine3.21
 
 WORKDIR /app/backend
 
